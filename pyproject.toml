@@ -1,0 +1,17 @@
+[project]
+name = "api-health-monitor"
+version = "0.1.0"
+description = "A Python API health-checking tool with timeout handling, error detection, and structured health results."
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.31.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "responses>=0.25.0",
+]
+
+[project.scripts]
+api-health-monitor = "api_health_monitor.cli:main"
