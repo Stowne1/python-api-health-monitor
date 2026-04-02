@@ -3,7 +3,7 @@ from api_health_monitor.checker import check_health
 
 
 def main():
-    parser = argparse.ArgumentParser(description="check on the health of one ore more APIs")
+    parser = argparse.ArgumentParser(description="check on the health of one or more APIs")
     parser.add_argument("urls", nargs="+", help="One or more URLs to check")
     args = parser.parse_args()
 

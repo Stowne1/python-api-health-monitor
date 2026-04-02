@@ -1,5 +1,4 @@
 import responses
-import requests
 from unittest.mock import patch
 from io import StringIO
 from api_health_monitor.cli import main

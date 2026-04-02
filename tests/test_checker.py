@@ -63,3 +63,22 @@ def test_connection_error():
     assert result.is_healthy is False
     assert result.status_code is None 
     assert "Connection failed" in result.error
+
+
+@responses.activate
+def test_404_is_unhealthy():
+    responses.add(
+        responses.GET,
+        "https://example.com/api",
+        status=404
+    )
+
+    result = check_health("https://example.com/api")
+
+    assert result.is_healthy is False 
+    assert result.status_code == 404
+    assert result.error is None
+
+
+
+
