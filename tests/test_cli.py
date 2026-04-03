@@ -1,4 +1,5 @@
 import responses
+import pytest
 from unittest.mock import patch
 from io import StringIO
 from api_health_monitor.cli import main
@@ -17,7 +18,7 @@ def test_healthy_output():
             main()
             output = mock_stdout.getvalue()
 
-    assert "[HEALTHY]" in output        
+    assert "[HEALTHY]" in output
 
 
 @responses.activate
@@ -30,9 +31,11 @@ def test_unhealthy_response():
     )
     with patch("sys.argv", ["cli", "https://example.com/api"]):
         with patch("sys.stdout", new_callable=StringIO) as mock_stdout:
-            main()
+            with pytest.raises(SystemExit) as exc_info:
+                main()
             output = mock_stdout.getvalue()
 
-    assert "[UNHEALTHY]" in output        
+    assert "[UNHEALTHY]" in output
+    assert exc_info.value.code == 1        
 
 
