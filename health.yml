@@ -1,0 +1,7 @@
+endpoints:
+  - name: Example API
+    url: https://example.com
+    timeout: 5
+  - name: HTTPBin
+    url: https://httpbin.org/status/200
+    timeout: 5
