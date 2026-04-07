@@ -1,16 +1,15 @@
-import responses
 import pytest
+import httpx
+import respx
 from unittest.mock import patch
 from io import StringIO
 from api_health_monitor.cli import main
 
 
-@responses.activate
+@respx.mock
 def test_healthy_output():
-    responses.add(
-        responses.GET,
-        "https://example.com/api",
-        status=200
+    respx.get(
+        "https://example.com/api").mock(return_value=httpx.Response(200)
     )
 
     with patch("sys.argv", ["cli", "https://example.com/api"]):
@@ -21,14 +20,12 @@ def test_healthy_output():
     assert "[HEALTHY]" in output
 
 
-@responses.activate
+@respx.mock
 def test_unhealthy_response():
-    responses.add(
-        responses.GET,
-        "https://example.com/api",
-        status=500
-
+    respx.get(
+        "https://example.com/api").mock(return_value=httpx.Response(500)
     )
+
     with patch("sys.argv", ["cli", "https://example.com/api"]):
         with patch("sys.stdout", new_callable=StringIO) as mock_stdout:
             with pytest.raises(SystemExit) as exc_info:

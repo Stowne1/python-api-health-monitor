@@ -1,17 +1,14 @@
-import responses
-import requests
+import pytest
+import httpx
+import respx
 from api_health_monitor.checker import check_health
 
 
-@responses.activate
-def test_healthy_response():
-    responses.add(
-        responses.GET,
-        "https://example.com/api",
-        status=200
-    )
-
-    result = check_health("https://example.com/api")
+@pytest.mark.asyncio
+@respx.mock
+async def test_healthy_response():
+    respx.get("https://example.com/api").mock(return_value=httpx.Response(200))
+    result = await check_health("https://example.com/api")
 
     assert result.url == "https://example.com/api"
     assert result.is_healthy is True
@@ -20,65 +17,45 @@ def test_healthy_response():
     assert result.error is None
 
 
-@responses.activate
-def test_unhealthy_response():
-    responses.add(
-        responses.GET,
-        "https://example.com/api",
-        status=500
-    )
-
-    result = check_health("https://example.com/api")
+@pytest.mark.asyncio
+@respx.mock
+async def test_unhealthy_response():
+    respx.get("https://example.com/api").mock(return_value=httpx.Response(500))
+    result = await check_health("https://example.com/api")
 
     assert result.is_healthy is False
     assert result.status_code == 500
     assert result.error is None
 
 
-@responses.activate
-def test_timeout():
-    responses.add(
-        responses.GET,
-        "https://example.com/api",
-        body=requests.exceptions.Timeout()
-    )
-
-    result = check_health("https://example.com/api")
+@pytest.mark.asyncio
+@respx.mock
+async def test_timeout():
+    respx.get("https://example.com/api").mock(side_effect=httpx.TimeoutException("timout"))
+    result = await check_health("https://example.com/api")
 
     assert result.is_healthy is False
     assert result.status_code is None
     assert "Timeout" in result.error
 
 
-@responses.activate
-def test_connection_error():
-    responses.add(
-        responses.GET,
-        "https://example.com/api",
-        body=requests.exceptions.ConnectionError()
-    )
-
-    result = check_health("https://example.com/api")
+@pytest.mark.asyncio
+@respx.mock
+async def test_connection_error():
+    respx.get("https://example.com/api").mock(side_effect=httpx.ConnectError("failed"))
+    result = await check_health("https://example.com/api")
 
     assert result.is_healthy is False
     assert result.status_code is None 
     assert "Connection failed" in result.error
 
 
-@responses.activate
-def test_404_is_unhealthy():
-    responses.add(
-        responses.GET,
-        "https://example.com/api",
-        status=404
-    )
-
-    result = check_health("https://example.com/api")
+@pytest.mark.asyncio
+@respx.mock
+async def test_404_is_unhealthy():
+    respx.get("https://example.com/api").mock(return_value=httpx.Response(404))
+    result = await check_health("https://example.com/api")
 
     assert result.is_healthy is False 
     assert result.status_code == 404
     assert result.error is None
-
-
-
-
