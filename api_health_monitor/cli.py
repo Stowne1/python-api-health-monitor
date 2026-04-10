@@ -8,6 +8,7 @@ from api_health_monitor.config import load_config
 from api_health_monitor.checker import check_all
 
 def main():
+    """Entry point for the api-health-monitor CLI."""
     parser = argparse.ArgumentParser(description="check on the health of one or more APIs")
     parser.add_argument("urls", nargs="*", help="One or more URLs to check")
     parser.add_argument("--json", action="store_true", help="Output results as JSON")

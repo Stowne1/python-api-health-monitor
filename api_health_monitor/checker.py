@@ -5,13 +5,18 @@ from api_health_monitor.models import HealthResult
 
 
 async def check_health(url: str, timeout: float = 5.0, retries: int = 3) -> HealthResult:
+    """Check the health of a single URL.
+
+    Retries on failure with exponential backoff (1s, 2s, 4s...).
+    Returns a HealthResult indicating whether the endpoint is healthy.
+    """
     for attempt in range(retries):
         start = time.time()
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.get(url, timeout=timeout)
             elapsed_ms = (time.time() - start) * 1000
-            is_healthy = response.status_code < 400
+            is_healthy = response.status_code < 400  # anything 400+ is unhealthy
             return HealthResult(
                 url=url,
                 is_healthy=is_healthy,
@@ -39,5 +44,6 @@ async def check_health(url: str, timeout: float = 5.0, retries: int = 3) -> Heal
 
 
 async def check_all(urls: list[str], timeout: float = 5.0, retries: int = 3) -> list[HealthResult]:
+    """Check all URLs concurrently and return a list of results."""
     tasks = [check_health(url, timeout, retries) for url in urls]
     return await asyncio.gather(*tasks)
