@@ -11,6 +11,7 @@ def main():
     parser.add_argument("urls", nargs="*", help="One or more URLs to check")
     parser.add_argument("--json", action="store_true", help="Output results as JSON")
     parser.add_argument("--config", help="Path to YAML config file")
+    parser.add_argument("--retries", type=int, default=3, help="Number of retries per URL")
     args = parser.parse_args()
 
     if args.config:
@@ -19,7 +20,7 @@ def main():
     else:
         urls = args.urls
 
-    results = asyncio.run(check_all(urls))
+    results = asyncio.run(check_all(urls, retries=args.retries))
     any_unhealthy = False
 
     for result in results:
